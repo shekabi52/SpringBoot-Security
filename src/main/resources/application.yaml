@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: demo
+  cache:
+    type: redis
+    host: localhost
+    port: 6379
+    redis:
+      time-to-live: 60000
+
+server:
+  port: 9091
