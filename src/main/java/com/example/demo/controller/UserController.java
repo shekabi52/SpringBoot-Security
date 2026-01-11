@@ -3,7 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.Entity.Employee;
 import com.example.demo.Service.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -18,6 +22,7 @@ public class UserController {
 
     @GetMapping("/api/v1/getEmployees")
     public Object getUsers(){
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return employeeServiceImpl.getAllEmployees();
     }
 
