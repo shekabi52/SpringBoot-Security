@@ -14,8 +14,7 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    private static final String SECRET_KEY = "abishekdossantosdeaviero" +
-            "abishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeaviero";
+    private static final String SECRET_KEY = "abishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeavieroabishekdossantosdeaviero";
     private static Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
 

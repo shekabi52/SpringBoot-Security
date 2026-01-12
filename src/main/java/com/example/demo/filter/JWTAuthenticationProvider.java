@@ -1,14 +1,12 @@
 package com.example.demo.filter;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class JWTAuthenticationProvider implements AuthenticationProvider {
 
@@ -20,17 +18,34 @@ public class JWTAuthenticationProvider implements AuthenticationProvider {
         this.jwtUtil = jwtUtil;
     }
 
+    @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String token = ((JwtAuthenticationToken) authentication).getToken();
-        String username = jwtUtil.validateAndExtarctUserName(token);
-
-        if(username == null){
-            throw new BadCredentialsException("Invalid token");
+        if (!(authentication instanceof JwtAuthenticationToken)) {
+            throw new BadCredentialsException("Unsupported authentication token");
         }
 
-        UserDetails user = userDetailsService.loadUserByUsername(username);
+        String token = ((JwtAuthenticationToken) authentication).getToken();
+        String username;
 
-        return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
+        try {
+            username = jwtUtil.validateAndExtarctUserName(token);
+        } catch (JwtException | IllegalArgumentException ex) {
+            throw new BadCredentialsException("Invalid JWT token", ex);
+        }
+
+        if (username == null || username.isBlank()) {
+            throw new BadCredentialsException("JWT token does not contain a subject");
+        }
+
+        UserDetails user;
+        try {
+            user = userDetailsService.loadUserByUsername(username);
+        } catch (Exception ex) {
+            throw new BadCredentialsException("User not found for JWT subject", ex);
+        }
+
+        // return an authenticated JwtAuthenticationToken containing the UserDetails and authorities
+        return new JwtAuthenticationToken(user, token, user.getAuthorities());
     }
 
     @Override

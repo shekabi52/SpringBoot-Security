@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.util.List;
 
+@EnableMethodSecurity
 @EnableWebSecurity
 @Configuration
 public class WebConfig {
@@ -41,7 +43,7 @@ public class WebConfig {
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtCustomFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(jwtValidationUtils, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(jwtValidationUtils, JWTCustomFilter.class);
 
         return http.build();
     }
@@ -66,11 +68,12 @@ public class WebConfig {
         return new JWTAuthenticationProvider(userDetailsService, jwtUtil);
     }
 
+
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails user = User.withUsername("user")
                 .password(passwordEncoder.encode("password"))
-                .roles("USER", "ADMIN")
+                .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
